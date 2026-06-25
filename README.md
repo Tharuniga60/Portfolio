@@ -1,16 +1,38 @@
-# React + Vite
+# Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Hi there! This is my personal portfolio website. I built it to showcase my projects, skills, education, and achievements as a B.Tech Information Technology student at Kongu Engineering College.
 
-Currently, two official plugins are available:
+## What's inside?
+- **About Me**: A quick intro to who I am and what I do.
+- **My Tech Stack**: Languages like Java, C++, Python, and JavaScript, along with web development tools.
+- **Projects**:
+  - A Java/MySQL CRUD platform.
+  - An interactive OS Scheduling Simulator.
+  - An IoT-based Smart Salinity Test & Alert system.
+  - A Deforestation Analysis project using machine learning.
+- **Coding Profiles & Internships**: Highlights from my problem-solving on LeetCode/GFG and experiences at Gateway Software Solutions and NewMak Technologies.
+- **Contact Form**: Integrated with EmailJS so people can reach out directly.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stuffs Used
+- **Frontend**: React.js, HTML5, CSS3, Bootstrap 5 (for quick grid layouts), FontAwesome for icons.
+- **Build Tool**: Vite (makes development and hot-reloading super fast).
+- **Form Submission**: EmailJS (sends contact form submissions straight to my email).
 
-## React Compiler
+## Running it locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+If you want to run the project on your machine:
 
-## Expanding the ESLint configuration
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/Tharuniga60/Portfolio.git
+   ```
+2. Go into the project folder and install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the dev server:
+   ```bash
+   npm run dev
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+That's pretty much it! Feel free to explore the code or reach out if you have any questions.
