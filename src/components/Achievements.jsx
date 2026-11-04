@@ -1,7 +1,5 @@
 import { achievements } from '../data/portfolioData';
 
-const delays = [null, 1, 2, null, 1, 2];
-
 export default function Achievements() {
   return (
     <section id="achievements">
@@ -15,7 +13,7 @@ export default function Achievements() {
           {achievements.map((item, i) => (
             <div
               key={item.id}
-              className={`col-lg-4 col-md-6 scroll-reveal${delays[i] ? ` delay-${delays[i]}` : ''}`}
+              className={`col-lg-4 col-md-6 scroll-reveal${i % 3 ? ` delay-${i % 3}` : ''}`}
             >
               <div className="achievement-card">
                 <div className="achievement-icon-wrapper" aria-hidden="true">

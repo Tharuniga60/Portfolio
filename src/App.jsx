@@ -13,12 +13,14 @@ import AITools from './components/AITools';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
+import FloatingBackground from './components/FloatingBackground';
 
 export default function App() {
   useScrollReveal();
 
   return (
     <>
+      <FloatingBackground />
       <Navbar />
       <main>
         <Hero />

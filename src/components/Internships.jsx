@@ -17,7 +17,10 @@ export default function Internships() {
                   <div key={item.id} className="timeline-item">
                     <div className="timeline-dot"></div>
                     <div className="timeline-meta">{item.meta}</div>
-                    <h3 className="timeline-title">{item.title}</h3>
+                    <h3 className="timeline-title">
+                      {item.title}
+                      {item.ongoing && <span className="timeline-status">Ongoing</span>}
+                    </h3>
                     <div className="timeline-institution">{item.institution}</div>
                     <div className="timeline-details text-muted">
                       <ul>
@@ -26,6 +29,17 @@ export default function Internships() {
                         ))}
                       </ul>
                     </div>
+                    {item.documentUrl && (
+                      <a
+                        href={item.documentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-outline-accent btn-sm timeline-doc-btn"
+                      >
+                        <i className="fa-solid fa-file-pdf me-2" aria-hidden="true"></i>
+                        {item.documentLabel}
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>

@@ -9,19 +9,25 @@ export default function AITools() {
           <h2 className="section-title">AI Tools I Use</h2>
         </div>
 
-        <div className="row scroll-reveal">
-          <div className="col-12">
-            <div className="ai-tools-wrapper">
-              <div className="ai-tools-scroll" aria-label="AI Tools Scrollbar Container">
-                {aiTools.map((tool) => (
-                  <div key={tool.id} className="ai-tool-badge">
-                    <i className={tool.icon} aria-hidden="true"></i> {tool.label}
-                  </div>
-                ))}
+        <ul className="row g-3 ai-tools-list scroll-reveal">
+          {aiTools.map((tool) => (
+            <li key={tool.id} className="col-lg-4 col-md-6">
+              <div className="ai-tool-item">
+                <span className="ai-tool-logo" aria-hidden="true">
+                  {tool.logo ? (
+                    <img src={tool.logo} alt="" width="26" height="26" loading="lazy" className={tool.wide ? 'wide' : undefined} />
+                  ) : (
+                    <i className={tool.icon}></i>
+                  )}
+                </span>
+                <span className="ai-tool-text">
+                  <span className="ai-tool-name">{tool.label}</span>
+                  <span className="ai-tool-use">{tool.use}</span>
+                </span>
               </div>
-            </div>
-          </div>
-        </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
