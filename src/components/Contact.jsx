@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import emailjs from '@emailjs/browser';
 import { contactInfo } from '../data/portfolioData';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -7,14 +6,18 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const initialForm = { name: '', email: '', subject: '', message: '' };
 const initialErrors = { name: false, email: false, subject: false, message: false };
 
-// EmailJS keys are public by design; they can be overridden with VITE_EMAILJS_* env vars.
-const EMAILJS = {
-  serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_6vweave',
-  templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_gsfsps9',
-  publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'tICK01nX3y9aOESsl',
-};
-
 const directEmail = contactInfo.find((c) => c.id === 'email');
+const INBOX = directEmail.display;
+
+// Messages are delivered to the inbox by FormSubmit (no account or API key needed).
+// After activation, VITE_FORMSUBMIT_ID can hold the alias FormSubmit emails you, to hide the address.
+const FORM_ENDPOINT = `https://formsubmit.co/ajax/${import.meta.env.VITE_FORMSUBMIT_ID || INBOX}`;
+
+// Fallback: open the visitor's own mail app with the message pre-filled.
+const mailtoLink = ({ name, email, subject, message }) =>
+  `mailto:${INBOX}?subject=${encodeURIComponent(subject || 'Portfolio enquiry')}&body=${encodeURIComponent(
+    `${message}\n\n— ${name}${email ? ` (${email})` : ''}`
+  )}`;
 
 export default function Contact() {
   const [form, setForm] = useState(initialForm);
@@ -66,30 +69,32 @@ export default function Contact() {
     const email = form.email.trim();
 
     try {
-      await emailjs.send(
-        EMAILJS.serviceId,
-        EMAILJS.templateId,
-        {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
           name,
           email,
-          from_name: name,
-          from_email: email,
-          reply_to: email,
+          _replyto: email,
+          _subject: `Portfolio contact: ${form.subject.trim()}`,
           subject: form.subject.trim(),
           message: form.message.trim(),
-        },
-        { publicKey: EMAILJS.publicKey }
-      );
+          _template: 'table',
+          _captcha: 'false',
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || String(data.success) !== 'true') {
+        throw new Error(data.message || `HTTP ${res.status}`);
+      }
 
       setShowSuccess(true);
       setForm(initialForm);
       setValid(initialErrors);
       setTimeout(() => setShowSuccess(false), 5000);
     } catch (error) {
-      console.error('EmailJS error:', error?.status, error?.text || error);
-      setSendError(
-        'Sorry, your message could not be sent right now. Please try again later or email me directly at '
-      );
+      console.error('Contact form error:', error.message);
+      setSendError('Sorry, your message could not be sent right now. You can send it from your own email app instead:');
     } finally {
       setSending(false);
     }
@@ -167,7 +172,15 @@ export default function Contact() {
               {sendError && (
                 <div className="alert alert-danger mb-4" role="alert" style={{ borderLeft: '4px solid #dc3545' }}>
                   <i className="fa-solid fa-circle-exclamation me-2"></i> {sendError}
-                  {directEmail && <a href={directEmail.href}>{directEmail.display}</a>}.
+                  <div className="mt-3">
+                    <a href={mailtoLink(form)} className="btn btn-outline-accent btn-sm">
+                      <i className="fa-solid fa-envelope me-2" aria-hidden="true"></i>
+                      Open in my email app
+                    </a>
+                    <span className="ms-2 small">
+                      or write to <a href={directEmail.href}>{INBOX}</a>
+                    </span>
+                  </div>
                 </div>
               )}
 
