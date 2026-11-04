@@ -9,9 +9,40 @@ const initialErrors = { name: false, email: false, subject: false, message: fals
 const directEmail = contactInfo.find((c) => c.id === 'email');
 const INBOX = directEmail.display;
 
-// Messages are delivered to the inbox by FormSubmit (no account or API key needed).
-// After activation, VITE_FORMSUBMIT_ID can hold the alias FormSubmit emails you, to hide the address.
-const FORM_ENDPOINT = `https://formsubmit.co/ajax/${import.meta.env.VITE_FORMSUBMIT_ID || INBOX}`;
+// Messages are delivered to the inbox by Web3Forms when an access key is set
+// (free key from https://web3forms.com, sent to the inbox owner), otherwise by FormSubmit.
+const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY || '';
+const SEND_TIMEOUT_MS = 12000;
+
+const buildRequest = ({ name, email, subject, message }) => {
+  if (WEB3FORMS_KEY) {
+    return {
+      url: 'https://api.web3forms.com/submit',
+      body: {
+        access_key: WEB3FORMS_KEY,
+        subject: `Portfolio contact: ${subject}`,
+        from_name: name,
+        name,
+        email,
+        replyto: email,
+        message: `Subject: ${subject}\n\n${message}`,
+      },
+    };
+  }
+  return {
+    url: `https://formsubmit.co/ajax/${INBOX}`,
+    body: {
+      name,
+      email,
+      _replyto: email,
+      _subject: `Portfolio contact: ${subject}`,
+      subject,
+      message,
+      _template: 'table',
+      _captcha: 'false',
+    },
+  };
+};
 
 // Fallback: open the visitor's own mail app with the message pre-filled.
 const mailtoLink = ({ name, email, subject, message }) =>
@@ -68,20 +99,19 @@ export default function Contact() {
     const name = form.name.trim();
     const email = form.email.trim();
 
+    const { url, body } = buildRequest({
+      name,
+      email,
+      subject: form.subject.trim(),
+      message: form.message.trim(),
+    });
+
     try {
-      const res = await fetch(FORM_ENDPOINT, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          _replyto: email,
-          _subject: `Portfolio contact: ${form.subject.trim()}`,
-          subject: form.subject.trim(),
-          message: form.message.trim(),
-          _template: 'table',
-          _captcha: 'false',
-        }),
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || String(data.success) !== 'true') {
