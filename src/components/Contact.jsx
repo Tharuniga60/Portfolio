@@ -7,11 +7,22 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const initialForm = { name: '', email: '', subject: '', message: '' };
 const initialErrors = { name: false, email: false, subject: false, message: false };
 
+// EmailJS keys are public by design; they can be overridden with VITE_EMAILJS_* env vars.
+const EMAILJS = {
+  serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_6vweave',
+  templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_gsfsps9',
+  publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'tICK01nX3y9aOESsl',
+};
+
+const directEmail = contactInfo.find((c) => c.id === 'email');
+
 export default function Contact() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState(initialErrors);
   const [valid, setValid] = useState(initialErrors);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -45,45 +56,44 @@ export default function Contact() {
     return isValid;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (sending || !validate()) return;
 
-  if (!validate()) return;
+    setSending(true);
+    setSendError('');
+    const name = form.name.trim();
+    const email = form.email.trim();
 
-try {
+    try {
+      await emailjs.send(
+        EMAILJS.serviceId,
+        EMAILJS.templateId,
+        {
+          name,
+          email,
+          from_name: name,
+          from_email: email,
+          reply_to: email,
+          subject: form.subject.trim(),
+          message: form.message.trim(),
+        },
+        { publicKey: EMAILJS.publicKey }
+      );
 
-  console.log({
-    name: form.name,
-    email: form.email,
-    subject: form.subject,
-    message: form.message,
-  });
-
-  await emailjs.send(
-    'service_6vweave',
-    'template_gsfsps9',
-    {
-      name: form.name,
-      email: form.email,
-      subject: form.subject,
-      message: form.message,
-    },
-    'tICK01nX3y9aOESsl'
-  );
-
-  setShowSuccess(true);
-  setForm(initialForm);
-  setValid(initialErrors);
-
-  setTimeout(() => {
-    setShowSuccess(false);
-  }, 5000);
-
-} catch (error) {
-  console.error('EmailJS Error:', error);
-  alert('Failed to send message');
-}
-};
+      setShowSuccess(true);
+      setForm(initialForm);
+      setValid(initialErrors);
+      setTimeout(() => setShowSuccess(false), 5000);
+    } catch (error) {
+      console.error('EmailJS error:', error?.status, error?.text || error);
+      setSendError(
+        'Sorry, your message could not be sent right now. Please try again later or email me directly at '
+      );
+    } finally {
+      setSending(false);
+    }
+  };
 
   const inputClass = (field) => {
     if (errors[field]) return 'form-control is-invalid';
@@ -151,6 +161,13 @@ try {
                 >
                   <i className="fa-solid fa-circle-check me-2"></i> Message Sent Successfully! Thank
                   you, I will get back to you shortly.
+                </div>
+              )}
+
+              {sendError && (
+                <div className="alert alert-danger mb-4" role="alert" style={{ borderLeft: '4px solid #dc3545' }}>
+                  <i className="fa-solid fa-circle-exclamation me-2"></i> {sendError}
+                  {directEmail && <a href={directEmail.href}>{directEmail.display}</a>}.
                 </div>
               )}
 
@@ -226,8 +243,15 @@ try {
 
                   {/* Submit */}
                   <div className="col-12 pt-2">
-                    <button type="submit" className="btn btn-accent w-100">
-                      Send Message
+                    <button type="submit" className="btn btn-accent w-100" disabled={sending}>
+                      {sending ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                          Sending...
+                        </>
+                      ) : (
+                        'Send Message'
+                      )}
                     </button>
                   </div>
                 </div>
