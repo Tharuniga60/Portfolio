@@ -10,8 +10,8 @@ const directEmail = contactInfo.find((c) => c.id === 'email');
 const INBOX = directEmail.display;
 
 // Messages are delivered to the inbox by Web3Forms when an access key is set
-// (free key from https://web3forms.com, sent to the inbox owner), otherwise by FormSubmit.
-const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY || '';
+// (public key from the Web3Forms dashboard, safe in client code), otherwise by FormSubmit.
+const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY || '3df677d6-184f-4d31-a53b-c9550b6b5826';
 const SEND_TIMEOUT_MS = 12000;
 
 const buildRequest = ({ name, email, subject, message }) => {
